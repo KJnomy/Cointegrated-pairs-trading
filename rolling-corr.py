@@ -11,11 +11,11 @@ df2.columns= df2.columns.droplevel(1)
 
 rc=[] #array for rolling corr
 time=[]  # array for time record
-for n in range(1,len(df1)-29):
-    a= pd.Series(df1["Close"][n:n+29])
-    b= pd.Series(df2["Close"][n:n+29])
+for n in range(0,len(df1)-29):
+    a= pd.Series(df1["Close"][n:n+30]) #fixed from (n+29) to (n+30) 
+    b= pd.Series(df2["Close"][n:n+30])  
     corrcoef=a.corr(b)
-    time.append(df1.index[n])
+    time.append(df1.index[n+29])  #fixed from n to n+29 
     rc.append(corrcoef)
     
 
