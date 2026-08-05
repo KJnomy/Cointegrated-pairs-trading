@@ -19,6 +19,7 @@ for n in range(0,len(df1)-29):
     rc.append(corrcoef)
     
 
+print(np.average(rc))
 plt.plot(time,rc,label="Rolling Correlation")
 plt.xlabel("Time")
 plt.ylabel("Corr-coef")
