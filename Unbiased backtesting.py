@@ -128,3 +128,5 @@ daily_returns=pd.Series(daily_returns)
 Sharpe= (daily_returns.mean())*((252)**0.5)/(daily_returns.std())
 
 print(f"Annualized Sharpe ratio is: {Sharpe}")
+
+print(len(Trades))
