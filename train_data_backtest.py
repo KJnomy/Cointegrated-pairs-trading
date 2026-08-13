@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 s1=input("Enter stock 1: ")
 s2=input("Enter stock 2: ")
 
-df1=yf.download(s1,period="2y",interval="1d")
-df2=yf.download(s2,period="2y",interval="1d")
+df1 = yf.download(s1, start="2024-08-14", end="2026-08-14", interval="1d")
+df2 = yf.download(s2, start="2024-08-14", end="2026-08-14", interval="1d")
 
 df1.columns=df1.columns.droplevel(1)
 df2.columns=df2.columns.droplevel(1)
@@ -90,7 +90,9 @@ for i in range(1,len(roll_zscore)):
 Trades=pd.DataFrame(Trades,columns=["Date","Position_s1","Position_s2","Price_s1","Price_s2","Z-score"])
 Daily_data=pd.DataFrame(Daily_data,columns=["Date","Position_s1","Position_s2","Price_s1","Price_s2","Z-score"])
 
+print("Trades")
 print(Trades)
+print("Daily_data")
 print(Daily_data)
 
 pos_s1=Daily_data["Position_s1"]
@@ -132,4 +134,11 @@ Sharpe= (daily_returns.mean())*((252)**0.5)/(daily_returns.std())
 
 print(f"Annualized Sharpe ratio is: {Sharpe}")
 
-print(len(Trades))
+print(f"No. of trades: {len(Trades)}")
+
+equity_curve = (1 + daily_returns).cumprod()
+running_max = equity_curve.cummax()
+drawdown = (equity_curve - running_max) / running_max
+max_drawdown = drawdown.min()
+print(f"Max Drawdown: {max_drawdown:.2%}")
+
