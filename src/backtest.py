@@ -51,6 +51,20 @@ def compute_max_drawdown(daily_returns):
     max_drawdown = drawdown.min()
     return max_drawdown
 
+def compute_pnl(Trades):        
+    pnl=[]
+    for i in range(len(Trades)-1):
+        if Trades["Position_s1"].iloc[i]==-1:
+            s1_pnl= Trades["Price_s1"].iloc[i] - Trades["Price_s1"].iloc[i+1]
+            s2_pnl=beta*(Trades["Price_s2"].iloc[i+1] - Trades["Price_s2"].iloc[i])
+            pnl.append(s1_pnl+s2_pnl)
+        elif Trades["Position_s1"].iloc[i]==1:
+            s1_pnl= Trades["Price_s1"].iloc[i+1] - Trades["Price_s1"].iloc[i]
+            s2_pnl=beta*(Trades["Price_s2"].iloc[i] - Trades["Price_s2"].iloc[i+1])
+            pnl.append(s1_pnl+s2_pnl)
+    PnL=[float(i) for i in pnl]
+    return (PnL)
+
 
 def run_backtest(y, x, a, beta, label):
     spread = y - a - beta*x
@@ -64,12 +78,15 @@ def run_backtest(y, x, a, beta, label):
 
     Sharpe = compute_sharpe(daily_returns)
     max_drawdown = compute_max_drawdown(daily_returns)
+    pnl=compute_pnl(Trades)
 
     print(f"{label} Annualized Sharpe ratio is: {Sharpe}")
     print(f"{label} No. of trades: {len(Trades)}")
     print(f"{label} Max Drawdown: {max_drawdown:.2%}")
+    print(f"{label} PnL in each trade: {pnl}")
+    print(f"{label} Total PnL: {sum(pnl)}")
 
-    return Sharpe, max_drawdown, Trades, daily_returns
+    return Sharpe, max_drawdown, pnl, Trades, daily_returns        
 
 
 if __name__ == "__main__":
