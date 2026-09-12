@@ -142,3 +142,20 @@ drawdown = (equity_curve - running_max) / running_max
 max_drawdown = drawdown.min()
 print(f"Max Drawdown: {max_drawdown:.2%}")
 
+
+pnl=[]
+for i in range(len(Trades)-1):
+  if Trades["Position_s1"].iloc[i]==-1:
+    s1_pnl= Trades["Price_s1"].iloc[i] - Trades["Price_s1"].iloc[i+1]
+    s2_pnl=beta*(Trades["Price_s2"].iloc[i+1] - Trades["Price_s2"].iloc[i])
+    pnl.append(s1_pnl+s2_pnl)
+  elif Trades["Position_s1"].iloc[i]==1:
+    s1_pnl= Trades["Price_s1"].iloc[i+1] - Trades["Price_s1"].iloc[i]
+    s2_pnl=beta*(Trades["Price_s2"].iloc[i] - Trades["Price_s2"].iloc[i+1])
+    pnl.append(s1_pnl+s2_pnl)
+      
+
+Total_pnl=sum(pnl)
+print("PnL")
+print(pnl)
+print("Total_PnL= ", Total_pnl)
