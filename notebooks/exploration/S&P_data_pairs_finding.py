@@ -47,3 +47,33 @@ for i in range(len(pair1)):
 coint_pairs=pd.DataFrame(coint_pairs,columns=("Pair1","Pair2","P-value")) # dataframe of cointegrated pairs
 
 print(coint_pairs)
+#%%
+coint_pair1=coint_pairs["Pair1"].tolist()
+coint_pair2=coint_pairs["Pair2"].tolist()
+
+hedge_ratio=[]
+adf_passed_pairs=[]
+
+for i in range(len(coint_pair1)):
+    x=prices[coint_pair1[i]]
+    y=prices[coint_pair2[i]]
+    x, y= x.align(y,join="inner")
+    x=sm.add_constant(x)
+    model=sm.OLS(y,x)
+    result=model.fit()
+    alpha=result.params.iloc[0]
+    beta=result.params.iloc[1]
+    hedge_ratio.append(beta)
+    # now performing adf test 
+    spread= prices[coint_pair2[i]] - alpha- beta*prices[coint_pair1[i]]
+    adf_test=sm.adfuller(spread)
+    if adf_test[1] <= 0.05:
+        adf_passed_pairs.append([coint_pair1[i],coint_pair2[i],adf_test[1]])
+
+coint_pairs["Hedge_ratio"]=hedge_ratio
+
+adf_passed_pairs=pd.DataFrame(adf_passed_pairs,columns=("Pair1","Pair2","P-value(adf)"))
+
+print(f"Cointegrated pairs after Engle Granger test: \n{coint_pairs}")
+print(f"Pairs after adfuller test: \n{adf_passed_pairs}")
+
