@@ -2,6 +2,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import statsmodels.tsa.stattools as sm
+import statsmodels.api as sma
 
 
 data=pd.read_csv("C:/Users/USER/OneDrive/Documents/PROJECTS/Cointegrated-pairs-trading/data/constituents.csv")
@@ -13,10 +14,12 @@ tickers=[ticker.replace(".","-") for ticker in tickers] # replacing . to - for y
 prices=yf.download(tickers,period="2y",interval="1d",auto_adjust=True)["Close"] # downloading all the stock data at once
                                                                                 # to avoid multiple api calls
 
-prices=prices.dropna(axis=1,thresh=len(prices)*0.4) # we are removing those stocks whose data has more than 
-                                                    # 60 percent na values
+prices=prices.dropna(axis=1,thresh=len(prices)*0.9) # keeping data whose na values not more than 10 precent 
 
-returns=prices.pct_change()  # calculating the returns of each day w.r.t prev day
+train_data=prices.iloc[0:int(len(prices)*0.65)]      
+test_data=prices.iloc[int(len(prices)*0.65):len(prices)]                                              
+
+returns=train_data.pct_change()  # calculating the returns of each day w.r.t prev day
 
 corr_matrix= returns.corr()
 
@@ -37,8 +40,8 @@ pair2=pairs["Pair2"].tolist() # list of tickers in pair2
 coint_pairs=[]
 
 for i in range(len(pair1)):
-    s1=prices[pair1[i]]  # closing price of pair1
-    s2=prices[pair2[i]]  #closing price of pair2
+    s1=train_data[pair1[i]]  # closing price of pair1
+    s2=train_data[pair2[i]]  #closing price of pair2
     s1, s2= s1.align(s2,join="inner")  #aligning them so that no mismatch of dates happen
     test=sm.coint(s1,s2) # Engle Granger test for cointegration
     if test[1]<=0.05:    # p-value less than 0.05 to reject null hypothesis
@@ -46,8 +49,7 @@ for i in range(len(pair1)):
 
 coint_pairs=pd.DataFrame(coint_pairs,columns=("Pair1","Pair2","P-value")) # dataframe of cointegrated pairs
 
-print(coint_pairs)
-#%%
+
 coint_pair1=coint_pairs["Pair1"].tolist()
 coint_pair2=coint_pairs["Pair2"].tolist()
 
@@ -55,24 +57,24 @@ hedge_ratio=[]
 adf_passed_pairs=[]
 
 for i in range(len(coint_pair1)):
-    x=prices[coint_pair1[i]]
-    y=prices[coint_pair2[i]]
+    x=train_data[coint_pair1[i]]
+    y=train_data[coint_pair2[i]]
     x, y= x.align(y,join="inner")
-    x=sm.add_constant(x)
-    model=sm.OLS(y,x)
+    z=sma.add_constant(x)
+    model=sm.OLS(y,z)
     result=model.fit()
     alpha=result.params.iloc[0]
     beta=result.params.iloc[1]
     hedge_ratio.append(beta)
     # now performing adf test 
-    spread= prices[coint_pair2[i]] - alpha- beta*prices[coint_pair1[i]]
+    spread= y - alpha- beta*x # before i was using prices[coint_pair1[i]] that will be misaliged so i used x and y which are aligned
     adf_test=sm.adfuller(spread)
     if adf_test[1] <= 0.05:
-        adf_passed_pairs.append([coint_pair1[i],coint_pair2[i],adf_test[1]])
+        adf_passed_pairs.append([coint_pair1[i],coint_pair2[i],adf_test[1],alpha,beta])
 
 coint_pairs["Hedge_ratio"]=hedge_ratio
 
-adf_passed_pairs=pd.DataFrame(adf_passed_pairs,columns=("Pair1","Pair2","P-value(adf)"))
+adf_passed_pairs=pd.DataFrame(adf_passed_pairs,columns=("Pair1","Pair2","P-value(adf)","Alpha","Hedge_ratio"))
 
 print(f"Cointegrated pairs after Engle Granger test: \n{coint_pairs}")
 print(f"Pairs after adfuller test: \n{adf_passed_pairs}")
