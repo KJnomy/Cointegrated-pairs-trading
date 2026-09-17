@@ -61,7 +61,7 @@ for i in range(len(coint_pair1)):
     x=train_data[coint_pair2[i]]
     x, y= x.align(y,join="inner")
     z=sma.add_constant(x)
-    model=sm.OLS(y,z)
+    model=sma.OLS(y,z)
     result=model.fit()
     alpha=result.params.iloc[0]
     beta=result.params.iloc[1]
@@ -75,6 +75,12 @@ for i in range(len(coint_pair1)):
 coint_pairs["Hedge_ratio"]=hedge_ratio
 
 adf_passed_pairs=pd.DataFrame(adf_passed_pairs,columns=("Pair1","Pair2","P-value(adf)","Alpha","Hedge_ratio"))
+
+adf_passed_pairs=adf_passed_pairs[adf_passed_pairs["Hedge_ratio"]>0] 
+# removed those pairs whose Hedge ratio in negative as it shows that both stocks move
+#  in same direction so our will become long-long short-short which is not our purpose
+
+adf_passed_pairs.reset_index(drop=True)  # resetting the index after removing the rows
 
 print(f"Cointegrated pairs after Engle Granger test: \n{coint_pairs}")
 print(f"Pairs after adfuller test: \n{adf_passed_pairs}")
@@ -118,12 +124,12 @@ for i in range(len(adf_passed_pairs)):
         price_s2=test_x.loc[date]
 
         if position_s1==0:
-            if z>=2:
+            if z>=2: # enter position when z greater than equal to 2
                 position_s1= -1   
                 position_s2= beta        # short s1 and long s2
                 Trades.append([date,position_s1,position_s2,price_s1,price_s2,z])
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])
-            elif z<=-2:
+            elif z<=-2: # enter position when z less than equal to -2
                 position_s1= 1
                 position_s2=-beta    # long s1 and short s2
                 Trades.append([date,position_s1,position_s2,price_s1,price_s2,z])
@@ -132,13 +138,19 @@ for i in range(len(adf_passed_pairs)):
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])        
 
         elif position_s1==-1:
-            if z<=0.4:
+            if z<=0.4:  # exit position if z comes below 0.4
                 position_s1=0
                 position_s2=0
                 Trades.append([date,position_s1,position_s2,price_s1,price_s2,z])
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])
-            elif 0.4<z:
+            elif 0.4<z: # keep in position if z doesn't hit 0.4
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])
+
+            elif z >= 3.5:   # if spread goes beyond 3.5 then our position got stuck and will generate huge loss 
+                position_s1 = 0
+                position_s2 = 0
+                Trades.append([date, position_s1, position_s2, price_s1, price_s2, z])
+                Daily_data.append([date, position_s1, position_s2, price_s1, price_s2, z])
 
 
         elif position_s1==1:
@@ -149,6 +161,12 @@ for i in range(len(adf_passed_pairs)):
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])
             elif z<-0.4:
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])
+
+            elif z <= -3.5:   # spread blew past entry — stop out, don't wait
+                position_s1 = 0
+                position_s2 = 0
+                Trades.append([date, position_s1, position_s2, price_s1, price_s2, z])
+                Daily_data.append([date, position_s1, position_s2, price_s1, price_s2, z])
 
         
 
