@@ -92,6 +92,7 @@ trade_results=[]
 
 capital= 1000000  # we are taking capital of 1 million dollars to trade 
                   # and each trade has an investment of 1 million only
+Transaction_cost= 10  # fixed transaction cost for each trade
 
 for i in range(len(adf_passed_pairs)):
     s1=adf_passed_pairs["Pair1"].iloc[i]
@@ -206,7 +207,11 @@ for i in range(len(adf_passed_pairs)):
         elif pos_s1.iloc[i-1]==0 :
             daily_returns.append(0)
 
-    daily_returns=pd.Series(daily_returns)
+    daily_returns=pd.Series(daily_returns,index=Daily_data["Date"])
+    for i in Trades["Date"]:
+        if i in daily_returns.index:
+            daily_returns[i] -= Transaction_cost/capital    # we have to subtract the transaction cost as soon we enter the trade
+
     active = daily_returns[daily_returns != 0] # active days in which we are in position
     Sharpe = active.mean() * (252**0.5) / active.std() # calcutaed sharpe on active days only
     
@@ -226,7 +231,7 @@ for i in range(len(adf_passed_pairs)):
             s2_pnl=beta*(Trades["Price_s2"].iloc[i] - Trades["Price_s2"].iloc[i+1])
             pnl.append((s1_pnl+s2_pnl)*(capital/(Trades["Price_s1"].iloc[i]+beta*Trades["Price_s2"].iloc[i])))
             
-    Total_returns=(sum(pnl)/capital)*100 # total pnl generated from capital
+    Total_returns=((sum(pnl)-len(Trades)*Transaction_cost)/capital)*100 # total returns generated from capital after removing transaction charges
     
     trade_results.append([s1,s2,len(Trades),Sharpe,max_drawdown,Total_returns])
 
