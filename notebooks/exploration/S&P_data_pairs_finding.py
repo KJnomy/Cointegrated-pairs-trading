@@ -57,8 +57,8 @@ hedge_ratio=[]
 adf_passed_pairs=[]
 
 for i in range(len(coint_pair1)):
-    x=train_data[coint_pair1[i]]
-    y=train_data[coint_pair2[i]]
+    y=train_data[coint_pair1[i]]
+    x=train_data[coint_pair2[i]]
     x, y= x.align(y,join="inner")
     z=sma.add_constant(x)
     model=sm.OLS(y,z)
