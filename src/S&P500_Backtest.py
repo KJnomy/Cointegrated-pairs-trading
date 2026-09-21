@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import statsmodels.tsa.stattools as sm
 import statsmodels.api as sma
-
+import matplotlib.pyplot as plt
 
 data=pd.read_csv("C:/Users/USER/OneDrive/Documents/PROJECTS/Cointegrated-pairs-trading/data/constituents.csv")
 
@@ -11,8 +11,8 @@ tickers=data["Symbol"].tolist()
 
 tickers=[ticker.replace(".","-") for ticker in tickers] # replacing . to - for yfinance api readability
 
-prices=yf.download(tickers,period="2y",interval="1d",auto_adjust=True)["Close"] # downloading all the stock data at once
-                                                                                # to avoid multiple api calls
+prices=pd.read_csv("C:/Users/USER/OneDrive/Documents/PROJECTS/Cointegrated-pairs-trading/data/prices.csv",
+                   index_col="Date",parse_dates=True)    # to avoid multiple api calls we stored prices from S&P_data_pairs_finding.py
 
 prices=prices.dropna(axis=1,thresh=len(prices)*0.9) # keeping data whose na values not more than 10 precent 
 
@@ -80,7 +80,7 @@ adf_passed_pairs=adf_passed_pairs[adf_passed_pairs["Hedge_ratio"]>0]
 # removed those pairs whose Hedge ratio in negative as it shows that both stocks move
 #  in same direction so our will become long-long short-short which is not our purpose
 
-adf_passed_pairs.reset_index(drop=True)  # resetting the index after removing the rows
+adf_passed_pairs=adf_passed_pairs.reset_index(drop=True)  # resetting the index after removing the rows
 
 print(f"Cointegrated pairs after Engle Granger test: \n{coint_pairs}")
 print(f"Pairs after adfuller test: \n{adf_passed_pairs}")
@@ -92,8 +92,8 @@ trade_results=[]
 
 capital= 1000000  # we are taking capital of 1 million dollars to trade 
                   # and each trade has an investment of 1 million only
-Transaction_cost= 10  # fixed transaction cost for each trade
-
+Transaction_cost_percent= 0.1   # fixed transaction cost for each trade
+equity_curves={}
 for i in range(len(adf_passed_pairs)):
     s1=adf_passed_pairs["Pair1"].iloc[i]
     s2=adf_passed_pairs["Pair2"].iloc[i]
@@ -139,37 +139,34 @@ for i in range(len(adf_passed_pairs)):
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])        
 
         elif position_s1==-1:
-            if z<=0.4:  # exit position if z comes below 0.4
+            if z >= 3.5:   #exit if spread goes beyond 3.5 then our position got stuck and will generate huge loss 
+                position_s1 = 0
+                position_s2 = 0
+                Trades.append([date, position_s1, position_s2, price_s1, price_s2, z])
+                Daily_data.append([date, position_s1, position_s2, price_s1, price_s2, z])
+            
+            elif z<=0.4:  # exit position if z comes below 0.4
                 position_s1=0
                 position_s2=0
                 Trades.append([date,position_s1,position_s2,price_s1,price_s2,z])
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])
             elif 0.4<z: # keep in position if z doesn't hit 0.4
-                Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])
+                Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])           
 
-            elif z >= 3.5:   # if spread goes beyond 3.5 then our position got stuck and will generate huge loss 
+        elif position_s1==1:
+            if z <= -3.5:   # exit if spread goes beyond -3.5 then our position got stuck and will generate huge loss
                 position_s1 = 0
                 position_s2 = 0
                 Trades.append([date, position_s1, position_s2, price_s1, price_s2, z])
                 Daily_data.append([date, position_s1, position_s2, price_s1, price_s2, z])
-
-
-        elif position_s1==1:
-            if z>=-0.4:
+            elif z>=-0.4:
                 position_s1=0
                 position_s2=0
                 Trades.append([date,position_s1,position_s2,price_s1,price_s2,z])
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])
             elif z<-0.4:
                 Daily_data.append([date,position_s1,position_s2,price_s1,price_s2,z])
-
-            elif z <= -3.5:   # spread blew past entry — stop out, don't wait
-                position_s1 = 0
-                position_s2 = 0
-                Trades.append([date, position_s1, position_s2, price_s1, price_s2, z])
-                Daily_data.append([date, position_s1, position_s2, price_s1, price_s2, z])
-
-        
+       
 
     Trades=pd.DataFrame(Trades,columns=["Date","Position_s1","Position_s2","Price_s1","Price_s2","Z-score"])
     Daily_data=pd.DataFrame(Daily_data,columns=["Date","Position_s1","Position_s2","Price_s1","Price_s2","Z-score"])
@@ -210,12 +207,12 @@ for i in range(len(adf_passed_pairs)):
     daily_returns=pd.Series(daily_returns,index=Daily_data["Date"])
     for i in Trades["Date"]:
         if i in daily_returns.index:
-            daily_returns[i] -= Transaction_cost/capital    # we have to subtract the transaction cost as soon we enter the trade
+            daily_returns[i] -= Transaction_cost_percent/100    # we have to subtract the transaction cost as soon we enter the trade
 
-    active = daily_returns[daily_returns != 0] # active days in which we are in position
-    Sharpe = active.mean() * (252**0.5) / active.std() # calcutaed sharpe on active days only
+    Sharpe = daily_returns.mean() * ((252**0.5) / daily_returns.std()) # calcutaed sharpe on active days only
     
     equity_curve = (1 + daily_returns).cumprod()
+    equity_curves[(s1,s2)]= equity_curve
     running_max = equity_curve.cummax()
     drawdown = (equity_curve - running_max) / running_max
     max_drawdown = drawdown.min()
@@ -231,12 +228,123 @@ for i in range(len(adf_passed_pairs)):
             s2_pnl=beta*(Trades["Price_s2"].iloc[i] - Trades["Price_s2"].iloc[i+1])
             pnl.append((s1_pnl+s2_pnl)*(capital/(Trades["Price_s1"].iloc[i]+beta*Trades["Price_s2"].iloc[i])))
             
-    Total_returns=((sum(pnl)-len(Trades)*Transaction_cost)/capital)*100 # total returns generated from capital after removing transaction charges
-    
-    trade_results.append([s1,s2,len(Trades),Sharpe,max_drawdown,Total_returns])
+    Total_returns=((sum(pnl)-len(Trades)*(Transaction_cost_percent/100)*capital)/capital)*100 # total returns generated from capital after removing transaction charges
+    Win_rate=(sum(i>0 for i in pnl)/len(pnl))*100
+    trade_results.append([s1,s2,len(Trades),Sharpe,max_drawdown,Total_returns,Win_rate])
 
    
-trade_results=pd.DataFrame(trade_results,columns=("Stock1","Stock2","No. of trades","Sharpe ratio","Max drawdown","Returns_in_percent"))
+trade_results=pd.DataFrame(trade_results,columns=("Stock1","Stock2","No. of trades","Sharpe ratio","Max drawdown","Returns_in_percent","Win_rate"))
+
+adf_pval=adf_passed_pairs["P-value(adf)"].to_list()
+adf_alpha=adf_passed_pairs["Alpha"].to_list()
+adf_beta=adf_passed_pairs["Hedge_ratio"].to_list()
+trade_results["P-value(adf)"]=adf_pval
+trade_results["Alpha(adf)"]=adf_alpha
+trade_results["Hedge_ratio(adf)"]=adf_beta
 
 print(trade_results)
 
+#Industry map for our adf passed pairs needs to be changed if hardcoded time frame changes
+
+def Stock_info(ticker):
+    try:
+        info=yf.Ticker(ticker).info
+        return {"Sector":info.get("sector"),
+                "Industry": info.get("industry")
+                }
+    except Exception:
+        return {"Sector": ("none"),
+                "Industry": ("none")}
+
+
+adf_tickers = set(trade_results["Stock1"]) | set(trade_results["Stock2"])
+
+stock_info = {
+    ticker: Stock_info(ticker)
+    for ticker in adf_tickers
+}
+
+industry_classification = []
+
+for s1, s2 in zip(trade_results["Stock1"],trade_results["Stock2"]):
+    industry1 = stock_info[s1]["Industry"]
+    industry2 = stock_info[s2]["Industry"]
+    if industry1 is None or industry2 is None:
+        classification = "Unknown"
+
+    elif industry1 == industry2:
+        classification = "Same"
+
+    else:
+        classification = "Cross"
+
+    industry_classification.append(classification)
+
+
+trade_results["Industry_type"] = industry_classification
+print(trade_results)
+
+from scipy.stats import ttest_ind 
+
+same = trade_results[trade_results["Industry_type"]=="Same"]["Sharpe ratio"]
+cross = trade_results[trade_results["Industry_type"]=="Cross"]["Sharpe ratio"]
+stat, pval = ttest_ind(same, cross, equal_var=False)
+print(f"Same-Industry — mean Sharpe: {same.mean():.2f}, n={len(same)}")
+print(f"Cross-Industry — mean Sharpe: {cross.mean():.2f}, n={len(cross)}")
+print(f"Welch t-stat: {stat:.2f}, p-value: {pval:.4f}")
+
+
+strong = trade_results[trade_results["P-value(adf)"] < 0.01]
+weak = trade_results[(trade_results["P-value(adf)"] >= 0.01) & (trade_results["P-value(adf)"] <= 0.05)]
+print(f"Strong coint (p<0.01) — % positive Sharpe: {(strong['Sharpe ratio']>0).mean()*100:.0f}%")
+print(f"Weak coint (p<0.05) — % positive Sharpe: {(weak['Sharpe ratio']>0).mean()*100:.0f}%")
+
+trade_results.to_csv("4_results/trade_results.csv", index=False)
+adf_passed_pairs.to_csv("4_results/ADF_passed_pairs.csv", index=False)
+test_data.to_csv("4_results/test_data.csv")
+train_data.to_csv("4_results/train_data")
+
+best_pairs=[]
+
+for i in range(len(trade_results)):
+    if (trade_results["Sharpe ratio"].iloc[i]>1 and trade_results["P-value(adf)"].iloc[i]<0.01 
+        and trade_results["Win_rate"].iloc[i]>75 and trade_results["Max drawdown"].iloc[i]>-5):
+        best_pairs.append([trade_results["Stock1"].iloc[i],trade_results["Stock2"].iloc[i]])
+
+best_pairs=pd.DataFrame(best_pairs,columns=("Stock1","Stock2"))
+best_pairs.to_csv("4_results/Best_pairs.csv")
+
+print(best_pairs)
+
+plt.figure(figsize=(14, 7))
+
+for _, row in best_pairs.iterrows():
+
+    s1 = row["Stock1"]
+    s2 = row["Stock2"]
+
+    equity_curve = equity_curves[(s1, s2)]
+
+    plt.plot(
+        equity_curve.index,
+        equity_curve.values,
+        linewidth=1.8,
+        label=f"{s1} - {s2}"
+    )
+
+plt.title("Equity Curves of Best Pairs")
+plt.xlabel("Date")
+plt.ylabel("Portfolio Value in Million($)")
+plt.legend(
+    bbox_to_anchor=(1.02, 1),
+    loc="upper left"
+)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.savefig(
+    "4_results/Top5_pairs_equity_curves.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
