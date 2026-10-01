@@ -209,7 +209,7 @@ for i in range(len(adf_passed_pairs)):
         if i in daily_returns.index:
             daily_returns[i] -= Transaction_cost_percent/100    # we have to subtract the transaction cost as soon we enter the trade
 
-    Sharpe = daily_returns.mean() * ((252**0.5) / daily_returns.std()) # calcutaed sharpe on active days only
+    Sharpe = daily_returns.mean() * ((252)**(0.5) / daily_returns.std()) # calculated sharpe ratio
     
     equity_curve = (1 + daily_returns).cumprod()
     equity_curves[(s1,s2)]= equity_curve
@@ -299,20 +299,20 @@ weak = trade_results[(trade_results["P-value(adf)"] >= 0.01) & (trade_results["P
 print(f"Strong coint (p<0.01) — % positive Sharpe: {(strong['Sharpe ratio']>0).mean()*100:.0f}%")
 print(f"Weak coint (p<0.05) — % positive Sharpe: {(weak['Sharpe ratio']>0).mean()*100:.0f}%")
 
-trade_results.to_csv("4_results/trade_results.csv", index=False)
-adf_passed_pairs.to_csv("4_results/ADF_passed_pairs.csv", index=False)
-test_data.to_csv("4_results/test_data.csv")
-train_data.to_csv("4_results/train_data")
+trade_results.to_csv("results/trade_results.csv", index=False)
+adf_passed_pairs.to_csv("results/ADF_passed_pairs.csv", index=False)
+test_data.to_csv("data/test_data.csv")
+train_data.to_csv("data/train_data.csv")
 
 best_pairs=[]
 
 for i in range(len(trade_results)):
     if (trade_results["Sharpe ratio"].iloc[i]>1 and trade_results["P-value(adf)"].iloc[i]<0.01 
-        and trade_results["Win_rate"].iloc[i]>75 and trade_results["Max drawdown"].iloc[i]>-5):
+        and trade_results["Win_rate"].iloc[i]>75 and trade_results["Max drawdown"].iloc[i]>-0.05): # changed max drawdown from 5 to 0.05 as it is percentage
         best_pairs.append([trade_results["Stock1"].iloc[i],trade_results["Stock2"].iloc[i]])
 
 best_pairs=pd.DataFrame(best_pairs,columns=("Stock1","Stock2"))
-best_pairs.to_csv("4_results/Best_pairs.csv")
+best_pairs.to_csv("results/Best_pairs.csv")
 
 print(best_pairs)
 
@@ -334,7 +334,7 @@ for _, row in best_pairs.iterrows():
 
 plt.title("Equity Curves of Best Pairs")
 plt.xlabel("Date")
-plt.ylabel("Portfolio Value in Million($)")
+plt.ylabel("Portfolio Value (Normalized)")
 plt.legend(
     bbox_to_anchor=(1.02, 1),
     loc="upper left"
@@ -342,7 +342,7 @@ plt.legend(
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig(
-    "4_results/Top5_pairs_equity_curves.png",
+    "results/Top_pairs_equity_curves.png",
     dpi=300,
     bbox_inches="tight"
 )
