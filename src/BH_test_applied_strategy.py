@@ -305,8 +305,8 @@ print(f"Weak coint (p<0.05) — % positive Sharpe: {(weak['Sharpe ratio']>0).mea
 
 trade_results.to_csv("results_BH/trade_results.csv", index=False)
 BH_pairs.to_csv("results_BH/BH_pairs.csv", index=False)
-test_data.to_csv("data/test_data_BH.csv")
-train_data.to_csv("data/train_data_BH")
+test_data.to_csv("data/test_data_BH_test.csv")
+train_data.to_csv("data/train_data_BH_test.csv")
 
 best_pairs=[]
 
