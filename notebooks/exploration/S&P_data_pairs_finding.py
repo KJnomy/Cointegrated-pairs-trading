@@ -1,8 +1,8 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import statsmodels.tsa.stattools as sm
-import statsmodels.api as sma
+import statsmodels.api as sm
+import statsmodels.tsa.stattools as sma
 
 
 data=pd.read_csv("C:/Users/USER/OneDrive/Documents/PROJECTS/Cointegrated-pairs-trading/data/constituents.csv")
@@ -11,8 +11,10 @@ tickers=data["Symbol"].tolist()
 
 tickers=[ticker.replace(".","-") for ticker in tickers] # replacing . to - for yfinance api readability
 
-prices=yf.download(tickers,period="2y",interval="1d",auto_adjust=True)["Close"] # downloading all the stock data at once
+prices=yf.download(tickers,start="2024-09-17", end="2026-09-17",interval="1d",auto_adjust=True)["Close"] # downloading all the stock data at once
                                                                                 # to avoid multiple api calls
+
+prices.to_csv("C:/Users/USER/OneDrive/Documents/PROJECTS/Cointegrated-pairs-trading/data/prices.csv")
 
 prices=prices.dropna(axis=1,thresh=len(prices)*0.9) # keeping data whose na values not more than 10 precent 
 
@@ -43,7 +45,7 @@ for i in range(len(pair1)):
     s1=train_data[pair1[i]]  # closing price of pair1
     s2=train_data[pair2[i]]  #closing price of pair2
     s1, s2= s1.align(s2,join="inner")  #aligning them so that no mismatch of dates happen
-    test=sm.coint(s1,s2) # Engle Granger test for cointegration
+    test=sma.coint(s1,s2) # Engle Granger test for cointegration
     if test[1]<=0.05:    # p-value less than 0.05 to reject null hypothesis
         coint_pairs.append([pair1[i],pair2[i],test[1]])
 
@@ -60,7 +62,7 @@ for i in range(len(coint_pair1)):
     y=train_data[coint_pair1[i]]
     x=train_data[coint_pair2[i]]
     x, y= x.align(y,join="inner")
-    z=sma.add_constant(x)
+    z=sm.add_constant(x)
     model=sm.OLS(y,z)
     result=model.fit()
     alpha=result.params.iloc[0]
@@ -68,7 +70,7 @@ for i in range(len(coint_pair1)):
     hedge_ratio.append(beta)
     # now performing adf test 
     spread= y - alpha- beta*x # before i was using prices[coint_pair1[i]] that will be misaliged so i used x and y which are aligned
-    adf_test=sm.adfuller(spread)
+    adf_test=sma.adfuller(spread)
     if adf_test[1] <= 0.05:
         adf_passed_pairs.append([coint_pair1[i],coint_pair2[i],adf_test[1],alpha,beta])
 
