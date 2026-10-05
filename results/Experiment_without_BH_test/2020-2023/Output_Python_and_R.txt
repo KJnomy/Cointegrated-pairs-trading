@@ -1,0 +1,123 @@
+Python output:
+
+     Pair1 Pair2  Correlation
+0        A   APH     0.716987
+1        A   DHR     0.719075
+2        A   IQV     0.725623
+3        A   MTD     0.722794
+4        A   TMO     0.703311
+...    ...   ...          ...
+4768    WM   WRB     0.734034
+4769    WM   XYL     0.737265
+4770   WRB    WY     0.719959
+4771   WRB   XYL     0.708679
+4772    WY   XYL     0.713405
+
+[4773 rows x 3 columns]
+Cointegrated pairs after Engle Granger test: 
+    Pair1  Pair2   P-value  Hedge_ratio
+0    ACGL    ADM  0.033569     0.388282
+1    ACGL    AJG  0.039617     0.155635
+2    ACGL    AXP  0.036355     0.148486
+3    ACGL  BRK-B  0.027929     0.110484
+4    ACGL    BRO  0.033479     0.502475
+..    ...    ...       ...          ...
+539   TFC    TPR  0.016137     0.730368
+540   TFC    TRV  0.005546     0.403285
+541   TFC    WRB  0.034606     2.154044
+542   TRV    USB  0.013713     2.279814
+543   USB    WRB  0.033668     2.155786
+
+[544 rows x 4 columns]
+Pairs after adfuller test: 
+    Pair1  Pair2  P-value(adf)      Alpha  Hedge_ratio
+0    ACGL    ADM      0.007799  17.071369     0.388282
+1    ACGL    AJG      0.009290  16.534787     0.155635
+2    ACGL    AXP      0.008795  16.119512     0.148486
+3    ACGL  BRK-B      0.006246   7.899575     0.110484
+4    ACGL    BRO      0.006977  10.881715     0.502475
+..    ...    ...           ...        ...          ...
+538   TFC    TPR      0.003511  18.649647     0.730368
+539   TFC    TRV      0.001069 -10.804165     0.403285
+540   TFC    WRB      0.008734 -19.674082     2.154044
+541   TRV    USB      0.002979  34.886198     2.279814
+542   USB    WRB      0.008461 -19.952578     2.155786
+
+[543 rows x 5 columns]
+    Stock1 Stock2  No. of trades  Sharpe ratio  ...   Win_rate  P-value(adf)  Alpha(adf)  Hedge_ratio(adf)
+0     ACGL    ADM             16      0.101480  ...  62.500000      0.007799   17.071369          0.388282
+1     ACGL    AJG             18      0.141431  ...  55.555556      0.009290   16.534787          0.155635
+2     ACGL    AXP              6     -1.238393  ...  66.666667      0.008795   16.119512          0.148486
+3     ACGL  BRK-B             16     -1.015861  ...  50.000000      0.006246    7.899575          0.110484
+4     ACGL    BRO             14     -1.928672  ...  57.142857      0.006977   10.881715          0.502475
+..     ...    ...            ...           ...  ...        ...           ...         ...               ...
+538    TFC    TPR             14      0.862560  ...  71.428571      0.003511   18.649647          0.730368
+539    TFC    TRV             14     -1.110861  ...  57.142857      0.001069  -10.804165          0.403285
+540    TFC    WRB              8     -1.652918  ...  25.000000      0.008734  -19.674082          2.154044
+541    TRV    USB             12     -1.069917  ...  66.666667      0.002979   34.886198          2.279814
+542    USB    WRB             10     -1.360708  ...  60.000000      0.008461  -19.952578          2.155786
+
+[543 rows x 10 columns]
+    Stock1 Stock2  No. of trades  Sharpe ratio  ...  P-value(adf)  Alpha(adf)  Hedge_ratio(adf)  Industry_type
+0     ACGL    ADM             16      0.101480  ...      0.007799   17.071369          0.388282          Cross
+1     ACGL    AJG             18      0.141431  ...      0.009290   16.534787          0.155635          Cross
+2     ACGL    AXP              6     -1.238393  ...      0.008795   16.119512          0.148486          Cross
+3     ACGL  BRK-B             16     -1.015861  ...      0.006246    7.899575          0.110484           Same
+4     ACGL    BRO             14     -1.928672  ...      0.006977   10.881715          0.502475          Cross
+..     ...    ...            ...           ...  ...           ...         ...               ...            ...
+538    TFC    TPR             14      0.862560  ...      0.003511   18.649647          0.730368          Cross
+539    TFC    TRV             14     -1.110861  ...      0.001069  -10.804165          0.403285          Cross
+540    TFC    WRB              8     -1.652918  ...      0.008734  -19.674082          2.154044          Cross
+541    TRV    USB             12     -1.069917  ...      0.002979   34.886198          2.279814          Cross
+542    USB    WRB             10     -1.360708  ...      0.008461  -19.952578          2.155786          Cross
+
+[543 rows x 11 columns]
+Same-Industry — mean Sharpe: -0.16, n=80
+Cross-Industry — mean Sharpe: -0.05, n=463
+Welch t-stat: -0.96, p-value: 0.3398
+Strong coint (p<0.01) — % positive Sharpe: 47%
+Weak coint (p<0.05) — % positive Sharpe: 45%
+   Stock1 Stock2
+0     ADI   KLAC
+1     AIG     CB
+2    ALLE    PRU
+3     AME    SYK
+4     AMP    PFG
+5     ARE   INVH
+6     CNP    PEG
+7     DHI    NVR
+8     DOV    STT
+9     DOW    LYB
+10    DRI    MGM
+11     EG    PRU
+12    FRT    SPG
+13    GPC   HUBB
+14     GS    JBL
+15     HD   NDSN
+16    HLT    MGM
+17    HST    MAR
+18    IVZ    USB
+19    JBL    PFG
+20    JBL    TXT
+21    LEN    NVR
+22   LRCX   NXPI
+23    MGM    SYF
+24   MPWR   SNPS
+25    NSC     WY
+26   NTRS   TROW
+27   NTRS    USB
+28    PNC   SCHW
+29    RJF   SCHW
+
+R output:
+
+cat("Pair:", stock1, "/", stock2, "\n")
+Pair: MPWR / SNPS 
+> cat("ADF p-value:", adf_p, "\n")
+ADF p-value: 0.07829152 
+> cat("Same industry mean Sharpe:", mean(same_industry), "\n")
+Same industry mean Sharpe: -0.1556176 
+> cat("Cross industry mean Sharpe:", mean(cross_industry), "\n")
+Cross industry mean Sharpe: -0.05189366 
+> cat("Industry t-test p-value:", test$p.value, "\n")
+Industry t-test p-value: 0.3397841 
