@@ -1,0 +1,37 @@
+    Pair1 Pair2  Correlation
+0       A   DHR     0.758526
+1       A   IQV     0.717554
+2       A   MTD     0.837790
+3       A  RVTY     0.795474
+4       A  TECH     0.786086
+..    ...   ...          ...
+746   TFC   WFC     0.785447
+747  TROW   USB     0.710516
+748   TRV   WRB     0.714288
+749   USB   WFC     0.773277
+750   VTR  WELL     0.769361
+
+[751 rows x 3 columns]
+Empty DataFrame
+Columns: [Pair1, Pair2, P-value, BH_pvalue, BH_significant, Hedge_ratio, Alpha]
+Index: []
+Empty DataFrame
+Columns: [Stock1, Stock2, No. of trades, Sharpe ratio, Max drawdown, Returns_in_percent, Win_rate, P-value, Alpha, Hedge_ratio]
+Index: []
+Empty DataFrame
+Columns: [Stock1, Stock2, No. of trades, Sharpe ratio, Max drawdown, Returns_in_percent, Win_rate, P-value, Alpha, Hedge_ratio, Industry_type]
+Index: []
+
+Industry comparison skipped.
+Not enough BH-significant pairs for a valid t-test.
+Same-industry pairs: 0
+Cross-industry pairs: 0
+Same-Industry — mean Sharpe: nan, n=0
+Cross-Industry — mean Sharpe: nan, n=0
+Strong coint (p<0.01) — % positive Sharpe: nan%
+Weak coint (p<0.05) — % positive Sharpe: nan%
+Empty DataFrame
+Columns: [Stock1, Stock2]
+Index: []
+c:\Users\USER\OneDrive\Documents\PROJECTS\Cointegrated-pairs-trading\src\Experiment_2\BH_test_applied_strategy.py:367: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+  plt.legend(
