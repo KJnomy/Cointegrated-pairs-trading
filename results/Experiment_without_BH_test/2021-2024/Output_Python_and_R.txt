@@ -1,0 +1,96 @@
+Python output
+
+     Pair1 Pair2  Correlation
+0        A   DHR     0.736500
+1        A  IDXX     0.707279
+2        A   IQV     0.739867
+3        A  MSCI     0.702923
+4        A   MTD     0.813598
+...    ...   ...          ...
+1273   USB   WFC     0.770006
+1274   VLO   XOM     0.774742
+1275   VTR  WELL     0.848347
+1276   WEC   XEL     0.885103
+1277   WMB   XOM     0.733769
+
+[1278 rows x 3 columns]
+Cointegrated pairs after Engle Granger test: 
+   Pair1 Pair2   P-value  Hedge_ratio
+0   ACGL    EG  0.001156     0.219169
+1    ACN  MSFT  0.007846     1.057110
+2    ADI   AMD  0.009764     0.319850
+3    ADI   APH  0.026878     4.875055
+4    ADI  KEYS  0.015384     0.375835
+..   ...   ...       ...          ...
+65    RF   STT  0.037310     0.086748
+66    RF   SYF  0.038218     0.051763
+67    RL   TPR  0.031292     2.305580
+68    SO   WEC  0.035804     0.912020
+69   WEC   XEL  0.045560     1.398600
+
+[70 rows x 4 columns]
+Pairs after adfuller test: 
+   Pair1 Pair2  P-value(adf)       Alpha  Hedge_ratio
+0   ACGL    EG      0.000188  -12.901009     0.219169
+1    ACN  MSFT      0.001583    5.021483     1.057110
+2    ADI   AMD      0.002044  118.093492     0.319850
+3    ADI   APH      0.006495   64.208395     4.875055
+4    ADI  KEYS      0.003407   88.981115     0.375835
+..   ...   ...           ...         ...          ...
+62    RF   STT      0.009516   11.449631     0.086748
+63    RF   SYF      0.009795   15.587737     0.051763
+64    RL   TPR      0.007652   23.460617     2.305580
+65    SO   WEC      0.009076  -17.036640     0.912020
+66   WEC   XEL      0.012035   -1.240011     1.398600
+
+[67 rows x 5 columns]
+   Stock1 Stock2  No. of trades  Sharpe ratio  ...   Win_rate  P-value(adf)  Alpha(adf)  Hedge_ratio(adf)
+0    ACGL     EG             18      1.193985  ...  77.777778      0.000188  -12.901009          0.219169
+1     ACN   MSFT             14     -0.772919  ...  28.571429      0.001583    5.021483          1.057110
+2     ADI    AMD             16      1.013075  ...  75.000000      0.002044  118.093492          0.319850
+3     ADI    APH             20      0.232198  ...  70.000000      0.006495   64.208395          4.875055
+4     ADI   KEYS             16      0.008869  ...  75.000000      0.003407   88.981115          0.375835
+..    ...    ...            ...           ...  ...        ...           ...         ...               ...
+62     RF    STT             16     -1.357487  ...  25.000000      0.009516   11.449631          0.086748
+63     RF    SYF             14     -0.922170  ...  42.857143      0.009795   15.587737          0.051763
+64     RL    TPR             16      0.028623  ...  62.500000      0.007652   23.460617          2.305580
+65     SO    WEC             14     -1.082690  ...  57.142857      0.009076  -17.036640          0.912020
+66    WEC    XEL             16     -1.654568  ...  37.500000      0.012035   -1.240011          1.398600
+
+[67 rows x 10 columns]
+   Stock1 Stock2  No. of trades  Sharpe ratio  ...  P-value(adf)  Alpha(adf)  Hedge_ratio(adf)  Industry_type
+0    ACGL     EG             18      1.193985  ...      0.000188  -12.901009          0.219169          Cross
+1     ACN   MSFT             14     -0.772919  ...      0.001583    5.021483          1.057110          Cross
+2     ADI    AMD             16      1.013075  ...      0.002044  118.093492          0.319850           Same
+3     ADI    APH             20      0.232198  ...      0.006495   64.208395          4.875055          Cross
+4     ADI   KEYS             16      0.008869  ...      0.003407   88.981115          0.375835          Cross
+..    ...    ...            ...           ...  ...           ...         ...               ...            ...
+62     RF    STT             16     -1.357487  ...      0.009516   11.449631          0.086748          Cross
+63     RF    SYF             14     -0.922170  ...      0.009795   15.587737          0.051763          Cross
+64     RL    TPR             16      0.028623  ...      0.007652   23.460617          2.305580          Cross
+65     SO    WEC             14     -1.082690  ...      0.009076  -17.036640          0.912020           Same
+66    WEC    XEL             16     -1.654568  ...      0.012035   -1.240011          1.398600           Same
+
+[67 rows x 11 columns]
+Same-Industry — mean Sharpe: 0.10, n=29
+Cross-Industry — mean Sharpe: -0.29, n=38
+Welch t-stat: 1.89, p-value: 0.0652
+Strong coint (p<0.01) — % positive Sharpe: 42%
+Weak coint (p<0.05) — % positive Sharpe: 25%
+  Stock1 Stock2
+0   ACGL     EG
+1    CMS    DTE
+2    CNP    ETR
+
+R output:
+
+cat("Pair:", stock1, "/", stock2, "\n")
+Pair: CMS / DTE 
+> cat("ADF p-value:", adf_p, "\n")
+ADF p-value: 0.05180333 
+> cat("Same industry mean Sharpe:", mean(same_industry), "\n")
+Same industry mean Sharpe: 0.1007471 
+> cat("Cross industry mean Sharpe:", mean(cross_industry), "\n")
+Cross industry mean Sharpe: -0.2894905 
+> cat("Industry t-test p-value:", test$p.value, "\n")
+Industry t-test p-value: 0.06520046 
