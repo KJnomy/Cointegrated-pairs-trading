@@ -1,0 +1,41 @@
+    Pair1 Pair2  Correlation
+0       A   DHR     0.708454
+1       A   MTD     0.787608
+2       A   TMO     0.755315
+3       A   WAT     0.829317
+4    ACGL    EG     0.776814
+..    ...   ...          ...
+586   TMO   WAT     0.704582
+587  TRGP   WMB     0.796536
+588   USB   WFC     0.723990
+589   VTR  WELL     0.791705
+590   WEC   XEL     0.762334
+
+[591 rows x 3 columns]
+    Pair1 Pair2   P-value  BH_pvalue  BH_significant  Hedge_ratio      Alpha
+67   AMAT  NXPI  0.000012   0.006823            True     1.120968 -69.436472
+496   MCO  SPGI  0.000083   0.024580            True     1.183808 -91.022814
+  Stock1 Stock2  No. of trades  Sharpe ratio  ...   Win_rate   P-value      Alpha  Hedge_ratio
+0   AMAT   NXPI             20     -0.067312  ...  60.000000  0.000012 -69.436472     1.120968
+1    MCO   SPGI             22     -0.319222  ...  63.636364  0.000083 -91.022814     1.183808
+
+[2 rows x 10 columns]
+  Stock1 Stock2  No. of trades  Sharpe ratio  ...   P-value      Alpha  Hedge_ratio  Industry_type
+0   AMAT   NXPI             20     -0.067312  ...  0.000012 -69.436472     1.120968          Cross
+1    MCO   SPGI             22     -0.319222  ...  0.000083 -91.022814     1.183808           Same
+
+[2 rows x 11 columns]
+
+Industry comparison skipped.
+Not enough BH-significant pairs for a valid t-test.
+Same-industry pairs: 1
+Cross-industry pairs: 1
+Same-Industry — mean Sharpe: -0.32, n=1
+Cross-Industry — mean Sharpe: -0.07, n=1
+Strong coint (p<0.01) — % positive Sharpe: 0%
+Weak coint (p<0.05) — % positive Sharpe: nan%
+Empty DataFrame
+Columns: [Stock1, Stock2]
+Index: []
+c:\Users\USER\OneDrive\Documents\PROJECTS\Cointegrated-pairs-trading\src\Experiment_2\BH_test_applied_strategy.py:367: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+  plt.legend(
